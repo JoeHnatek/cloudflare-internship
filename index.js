@@ -34,47 +34,55 @@ const rewriter = new HTMLRewriter()
 
 
 /**
- * Respond with hello worker text
+ * Respond with one of the two variant pages
  * @param {Request} request
  */
 async function handleRequest(request) {
-  let urlVariants = "https://cfw-takehome.developers.workers.dev/api/variants";
-  let resultOfVariants = [];
+
+  const cookie = request.headers.get('Cookie');
+  let siteToVisit = 'null';
+
+  if(cookie){
+    console.log(cookie)
+    let siteVal = cookie.split('=')[1]
+    
+    siteToVisit = siteVal;
+
+  }else{
+
+    let urlVariants = "https://cfw-takehome.developers.workers.dev/api/variants";
+    let resultOfVariants = [];
 
 
-  await fetch(urlVariants, {
-    method: 'GET',
-    headers: { 'content-type': 'application/json' }
-  })
-  .then(res => res.json())
-  .then(data => {
-    resultOfVariants = data["variants"];
-    console.log(resultOfVariants)
-  })
+    await fetch(urlVariants, {
+      method: 'GET',
+      headers: { 'content-type': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(data => {
+      resultOfVariants = data["variants"];
+      console.log(resultOfVariants);
+    })
 
-  let randomNumber = [Math.floor(Math.random() * resultOfVariants.length)];
+    let randomNumber = [Math.floor(Math.random() * resultOfVariants.length)];
 
-  let randomURL = resultOfVariants[randomNumber];
+    siteToVisit = resultOfVariants[randomNumber];
 
-  let resultOfRandomURL;
+    console.log(siteToVisit)
+  }
 
-  /*await fetch(randomURL, {
-    method: 'GET',
-    headers: { 'content-type': 'text/html; charset=UTF-8' }
-  })
-  .then(res => res.text())
-  .then(data => {
-    resultOfRandomURL = data
-    console.log(data)
-  })*/
+  const res = await fetch(siteToVisit);
+  let a = rewriter.transform(res)
 
-  const res = await fetch('https://cfw-takehome.developers.workers.dev/variants/2')
+  if(!cookie) {
+    const cookieDetails = `site=${siteToVisit}; Expires=Mon, 20 Apr 2020 12:00:00 CDT; Path='/';`
+    a.headers.set('Set-Cookie', cookieDetails);
+  }
 
-  //let a = rewriter.transform(res);
-  /*return new Response(a, {
-    headers: { 'content-type': 'text/html; charset=UTF-8' },
-  })*/
-  return rewriter.transform(res)
+  console.log(typeof a)
+  
+  return a;
+
 }
 
 addEventListener('fetch', event => {
