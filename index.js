@@ -44,7 +44,7 @@ async function handleRequest(request) {
   let siteToVisit = null;
   
   if(cookie){
-    
+
     let cookies = cookie.split(';')
 
     cookies.forEach(i => {
@@ -83,14 +83,14 @@ async function handleRequest(request) {
 }
 
   const res = await fetch(siteToVisit);
-  let a = rewriter.transform(res);
+  let response = rewriter.transform(res);
 
   if(!isSiteCookie) {
     const cookieDetails = `site=${siteToVisit}; Expires=Mon, 20 Apr 2020 12:00:00 CDT; Path='/';`
-    a.headers.set('Set-Cookie', cookieDetails);
+    response.headers.set('Set-Cookie', cookieDetails);
   }
 
-  return a;
+  return response;
 
 }
 
