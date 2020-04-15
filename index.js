@@ -44,18 +44,21 @@ async function handleRequest(request) {
   let siteToVisit = null;
   
   if(cookie){
+    
     let cookies = cookie.split(';')
-    console.log(cookies)
+
     cookies.forEach(i => {
+
       let cookieName = i.split('=')[0].trim()
-      console.log(cookieName)
+
       if(cookieName === 'site'){
+
         let siteVal = i.split('=')[1]
         siteToVisit = siteVal;
         isSiteCookie = true;
+
       }
     })
-    //console.log(cookie)
   }
 
   if(!isSiteCookie){
@@ -71,14 +74,12 @@ async function handleRequest(request) {
     .then(res => res.json())
     .then(data => {
       resultOfVariants = data["variants"];
-      //console.log(resultOfVariants);
     })
 
     let randomNumber = [Math.floor(Math.random() * resultOfVariants.length)];
 
     siteToVisit = resultOfVariants[randomNumber];
 
-    //console.log(siteToVisit)
 }
 
   const res = await fetch(siteToVisit);
@@ -89,8 +90,6 @@ async function handleRequest(request) {
     a.headers.set('Set-Cookie', cookieDetails);
   }
 
-  //console.log(typeof a)
-  
   return a;
 
 }
