@@ -40,15 +40,25 @@ const rewriter = new HTMLRewriter()
 async function handleRequest(request) {
 
   const cookie = request.headers.get('Cookie');
-  let siteToVisit = 'null';
-
+  let isSiteCookie = false;
+  let siteToVisit = null;
+  
   if(cookie){
-    console.log(cookie)
-    let siteVal = cookie.split('=')[1]
-    
-    siteToVisit = siteVal;
+    let cookies = cookie.split(';')
+    console.log(cookies)
+    cookies.forEach(i => {
+      let cookieName = i.split('=')[0].trim()
+      console.log(cookieName)
+      if(cookieName === 'site'){
+        let siteVal = i.split('=')[1]
+        siteToVisit = siteVal;
+        isSiteCookie = true;
+      }
+    })
+    //console.log(cookie)
+  }
 
-  }else{
+  if(!isSiteCookie){
 
     let urlVariants = "https://cfw-takehome.developers.workers.dev/api/variants";
     let resultOfVariants = [];
@@ -61,30 +71,30 @@ async function handleRequest(request) {
     .then(res => res.json())
     .then(data => {
       resultOfVariants = data["variants"];
-      console.log(resultOfVariants);
+      //console.log(resultOfVariants);
     })
 
     let randomNumber = [Math.floor(Math.random() * resultOfVariants.length)];
 
     siteToVisit = resultOfVariants[randomNumber];
 
-    console.log(siteToVisit)
-  }
+    //console.log(siteToVisit)
+}
 
   const res = await fetch(siteToVisit);
-  let a = rewriter.transform(res)
+  let a = rewriter.transform(res);
 
-  if(!cookie) {
+  if(!isSiteCookie) {
     const cookieDetails = `site=${siteToVisit}; Expires=Mon, 20 Apr 2020 12:00:00 CDT; Path='/';`
     a.headers.set('Set-Cookie', cookieDetails);
   }
 
-  console.log(typeof a)
+  //console.log(typeof a)
   
   return a;
 
 }
 
 addEventListener('fetch', event => {
-  event.respondWith(handleRequest(event.request))
+  event.respondWith(handleRequest(event.request));
 })
