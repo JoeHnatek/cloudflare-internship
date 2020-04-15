@@ -1,8 +1,5 @@
 class elementHandler {
-  constructor(elementName) {
-    this.elementName = elementName
-  }
-
+  
   element(element) {
 
     //Changes the title of the web page
